@@ -15,7 +15,7 @@ describe('ContactService', () => {
     vi.unstubAllGlobals();
   });
 
-  it('envía los datos como JSON por POST al webhook', async () => {
+  it('envía los datos como JSON por GET al webhook', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200 });
     vi.stubGlobal('fetch', fetchMock);
 
@@ -24,7 +24,7 @@ describe('ContactService', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, options] = fetchMock.mock.calls[0];
     expect(url).toBe(WEBHOOK_URL);
-    expect(options.method).toBe('POST');
+    expect(options.method).toBe('GET');
     expect(JSON.parse(options.body)).toEqual(datos);
   });
 
