@@ -1,0 +1,78 @@
+# Nombre del workflow: es el que aparece en la pestaña "Actions" de GitHub
+name: Angular CI/CD
+
+# on: define CUÁNDO se ejecuta el workflow
+on:
+  pull_request:            # CI: en cada pull request dirigida a main
+    branches: [main]
+  push:                    # CD: cuando el código llega a main (merge de una PR)
+    branches: [main]
+
+# jobs: conjunto de trabajos; cada job se ejecuta en su propia máquina virtual
+jobs:
+
+  # ---------------------------------------------------------------
+  # JOB 1: build (Integración Continua). Se ejecuta en PR y en push
+  # ---------------------------------------------------------------
+  build:
+    runs-on: ubuntu-latest        # máquina virtual limpia con Ubuntu
+    # permissions: permisos mínimos del token; aquí solo hace falta LEER el repo
+    permissions:
+      contents: read
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      - name: Instalar Node 22 con caché de npm
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # npm ci instala EXACTAMENTE lo que dice package-lock.json (reproducible)
+      - name: Instalar dependencias
+        run: npm ci
+
+      # EXTENSIÓN: los tests van ANTES de compilar. Si un test falla o la
+      # cobertura no llega a los umbrales de angular.json, el paso falla
+      - name: Tests con cobertura mínima
+        run: npx ng test --no-watch --coverage
+
+      - name: Subir informe de cobertura
+        if: always()              # se sube aunque los tests fallen
+        uses: actions/upload-artifact@v4
+        with:
+          name: informe-cobertura
+          path: coverage/
+          if-no-files-found: ignore
+
+      # Si hay un error de compilación, este paso falla y el job (la PR) también
+      - name: Compilar Angular
+        run: npx ng build --base-href /cicd-angular/
+
+      # Solo en push: en una PR no se publica nada
+      - name: Subir artefacto de GitHub Pages
+        if: github.event_name == 'push'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/cicd-angular/browser
+
+  # ---------------------------------------------------------------
+  # JOB 2: deploy (Despliegue Continuo) en GitHub Pages
+  # ---------------------------------------------------------------
+  deploy:
+    needs: build                  # needs: espera a que build termine bien
+    # if: solo se ejecuta en push a main (nunca en pull requests)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    # permissions: mínimos para publicar en Pages
+    permissions:
+      pages: write                # escribir en GitHub Pages
+      id-token: write             # verificar el origen del despliegue
+    environment:
+      name: github-pages          # entorno de despliegue de Pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Desplegar en GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
