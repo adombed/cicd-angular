@@ -9,5 +9,4 @@ import { ContactForm } from './contact-form/contact-form';
 })
 export class App {
   title = 'Formulario de contacto';
-  fallo: number = variableQueNoExiste;
 }
