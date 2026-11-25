@@ -20,6 +20,7 @@ describe('ContactService', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     await service.send(datos);
+    
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, options] = fetchMock.mock.calls[0];
@@ -31,5 +32,16 @@ describe('ContactService', () => {
   it('lanza un error si el webhook responde con error', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 500 }));
     await expect(service.send(datos)).rejects.toThrow('500');
+
+    resumen(d: ContactData): string {
+    const partes: string[] = [];
+    if (d.nombre) { partes.push(d.nombre); }
+    if (d.apellidos) { partes.push(d.apellidos); }
+    if (d.email) { partes.push(d.email); }
+    if (d.mensaje) { partes.push(d.mensaje); }
+    if (partes.length > 3) { partes.push('(mensaje completo)'); }
+    if (partes.length > 4) { partes.push('(datos completos)'); }
+    return partes.join(' | ');
+  }
   });
 });
