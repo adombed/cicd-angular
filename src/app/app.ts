@@ -8,5 +8,5 @@ import { ContactForm } from './contact-form/contact-form';
   styleUrl: './app.css',
 })
 export class App {
-  title = 'Formulario de contacto';
+  title = 'Formulario de contacto v2';
 }
