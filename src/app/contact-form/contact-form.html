@@ -1,0 +1,47 @@
+<form class="card" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+  <h2>Contacta con nosotros</h2>
+  <p class="subtitle">Rellena el formulario y te responderemos lo antes posible.</p>
+
+  <div class="row">
+    <div class="field">
+      <label for="nombre">Nombre</label>
+      <input id="nombre" type="text" formControlName="nombre"
+             placeholder="Tu nombre" [class.invalid]="invalid('nombre')" />
+      @if (invalid('nombre')) { <small class="error">El nombre es obligatorio</small> }
+    </div>
+    <div class="field">
+      <label for="apellidos">Apellidos</label>
+      <input id="apellidos" type="text" formControlName="apellidos"
+             placeholder="Tus apellidos" [class.invalid]="invalid('apellidos')" />
+      @if (invalid('apellidos')) { <small class="error">Los apellidos son obligatorios</small> }
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="email">Correo electrónico</label>
+    <input id="email" type="email" formControlName="email"
+           placeholder="tu@correo.com" [class.invalid]="invalid('email')" />
+    @if (invalid('email')) { <small class="error">Introduce un correo electrónico válido</small> }
+  </div>
+
+  <div class="field">
+    <label for="mensaje">Mensaje</label>
+    <textarea id="mensaje" formControlName="mensaje"
+              placeholder="Escribe tu mensaje..." [class.invalid]="invalid('mensaje')"></textarea>
+    @if (invalid('mensaje')) { <small class="error">El mensaje es obligatorio</small> }
+  </div>
+
+  <div class="actions">
+    <button type="submit" class="btn-primary" [disabled]="status() === 'sending'">
+      {{ status() === 'sending' ? 'Enviando…' : 'Enviar mensaje' }}
+    </button>
+    <button type="button" class="btn-secondary" (click)="onClear()">Limpiar</button>
+  </div>
+
+  @if (status() === 'success') {
+    <div class="alert success">¡Mensaje enviado correctamente!</div>
+  }
+  @if (status() === 'error') {
+    <div class="alert fail">No se pudo enviar el mensaje. Inténtalo de nuevo.</div>
+  }
+</form>
