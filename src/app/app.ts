@@ -9,5 +9,5 @@ import { ContactForm } from './contact-form/contact-form';
 })
 export class App {
   title = 'Formulario de contacto v2';
-  fallo: number = No hay ningun valor que añadir para el fallo
+  fallo: number = Nohayningunvalorqueañadir;
 }
